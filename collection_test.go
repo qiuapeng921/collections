@@ -1480,3 +1480,88 @@ func TestIdentity(t *testing.T) {
 		t.Error("Identity failed")
 	}
 }
+
+// 额外覆盖率测试
+
+func TestFirstOrNonEmpty(t *testing.T) {
+	col := collections.Make(1, 2, 3)
+	if col.FirstOr(0) != 1 {
+		t.Error("FirstOr should return first element")
+	}
+}
+
+func TestLastOrNonEmpty(t *testing.T) {
+	col := collections.Make(1, 2, 3)
+	if col.LastOr(0) != 3 {
+		t.Error("LastOr should return last element")
+	}
+}
+
+func TestValuesResetIndices(t *testing.T) {
+	col := collections.Make(1, 2, 3)
+	vals := col.Values()
+	if vals.Count() != 3 {
+		t.Error("Values should return same count")
+	}
+}
+
+func TestToJSONStringValid(t *testing.T) {
+	col := collections.Make(1, 2, 3)
+	jsonStr := col.ToJSONString()
+	if jsonStr == "" {
+		t.Error("ToJSONString should return valid JSON")
+	}
+}
+
+func TestCollectionDD(t *testing.T) {
+	defer func() {
+		if r := recover(); r == nil {
+			t.Error("DD should panic")
+		}
+	}()
+	col := collections.Make(1, 2, 3)
+	col.DD()
+}
+
+func TestOptionalGetOrWithValue(t *testing.T) {
+	opt := collections.Some(42)
+	if opt.GetOr(0) != 42 {
+		t.Error("GetOr should return value when present")
+	}
+}
+
+func TestJoinStringsMultiple(t *testing.T) {
+	col := collections.Make("a", "b", "c", "d")
+	result := collections.JoinStrings(col, ", ", " and ")
+	expected := "a, b, c and d"
+	if result != expected {
+		t.Errorf("Expected '%s', got '%s'", expected, result)
+	}
+}
+
+func TestJoinMultiple(t *testing.T) {
+	col := collections.Make(1, 2, 3, 4)
+	result := collections.Join(col, func(i int) string {
+		return string(rune('a' + i - 1))
+	}, ", ", " and ")
+	expected := "a, b, c and d"
+	if result != expected {
+		t.Errorf("Expected '%s', got '%s'", expected, result)
+	}
+}
+
+func TestJoinStringsTwoElements(t *testing.T) {
+	col := collections.Make("a", "b")
+	result := collections.JoinStrings(col, ", ", " and ")
+	if result != "a and b" {
+		t.Errorf("Expected 'a and b', got '%s'", result)
+	}
+}
+
+func TestJoinTwoElements(t *testing.T) {
+	intCol := collections.Make(1, 2)
+	resultInt := collections.Join(intCol, func(i int) string { return string(rune('a' + i - 1)) }, ", ", " and ")
+	if resultInt != "a and b" {
+		t.Errorf("Expected 'a and b', got '%s'", resultInt)
+	}
+}

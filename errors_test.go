@@ -89,3 +89,24 @@ func TestShiftOrFail(t *testing.T) {
 		t.Error("ShiftOrFail empty failed")
 	}
 }
+
+// 额外覆盖率测试
+
+func TestLastOrFailNonEmpty(t *testing.T) {
+	col := collections.Make(10, 20, 30)
+	last, err := col.LastOrFail()
+	if err != nil {
+		t.Errorf("LastOrFail should not error: %v", err)
+	}
+	if last != 30 {
+		t.Errorf("Expected 30, got %d", last)
+	}
+}
+
+func TestLastOrFailEmpty(t *testing.T) {
+	empty := collections.Empty[int]()
+	_, err := empty.LastOrFail()
+	if err == nil {
+		t.Error("LastOrFail empty should return error")
+	}
+}

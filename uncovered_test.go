@@ -207,3 +207,55 @@ func TestFlipEmpty(t *testing.T) {
 		t.Error("Flip empty failed")
 	}
 }
+
+// helpers.go 覆盖率测试
+
+func TestDataGetNilTargetHelper(t *testing.T) {
+	result := collections.DataGet(nil, "key", "default")
+	if result != "default" {
+		t.Error("DataGet should return default for nil target")
+	}
+}
+
+func TestDataGetNonMapTargetHelper(t *testing.T) {
+	result := collections.DataGet("not a map", "key", "default")
+	if result != "default" {
+		t.Error("DataGet should return default for non-map target")
+	}
+}
+
+func TestDataGetNestedPath(t *testing.T) {
+	data := map[string]any{
+		"a": map[string]any{
+			"b": map[string]any{
+				"c": 123,
+			},
+		},
+	}
+	result := collections.DataGet(data, "a.b.c")
+	if result != 123 {
+		t.Error("DataGet should return nested value")
+	}
+}
+
+func TestDataGetNestedNonMapPath(t *testing.T) {
+	data := map[string]any{"a": "not a map"}
+	result := collections.DataGet(data, "a.b", "default")
+	if result != "default" {
+		t.Error("DataGet should return default when path hits non-map")
+	}
+}
+
+func TestDataSetNonMapTargetHelper(t *testing.T) {
+	result := collections.DataSet("not a map", "key", "value")
+	if result != "not a map" {
+		t.Error("DataSet should return original for non-map target")
+	}
+}
+
+func TestDataForgetNonMapTargetHelper(t *testing.T) {
+	result := collections.DataForget("not a map", "key")
+	if result != "not a map" {
+		t.Error("DataForget should return original for non-map target")
+	}
+}

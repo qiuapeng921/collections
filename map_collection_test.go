@@ -240,3 +240,87 @@ func TestFromSlice(t *testing.T) {
 		t.Error("FromSlice failed")
 	}
 }
+
+// 额外覆盖率测试
+
+func TestNewMapNil(t *testing.T) {
+	m := collections.NewMap[string, int](nil)
+	if m.Count() != 0 {
+		t.Error("NewMap nil should create empty map")
+	}
+}
+
+func TestNewMapEmpty(t *testing.T) {
+	emptyMap := collections.NewMap(map[string]int{})
+	if emptyMap.Count() != 0 {
+		t.Error("Empty map should have 0 count")
+	}
+}
+
+func TestNewMapOrderedNilKeys(t *testing.T) {
+	m := collections.NewMapOrdered(map[string]int{"a": 1}, nil)
+	if m.Count() != 1 {
+		t.Error("NewMapOrdered should still work with nil keys")
+	}
+}
+
+func TestNewMapOrderedEmptyKeys(t *testing.T) {
+	orderedEmpty := collections.NewMapOrdered(map[string]int{"a": 1}, []string{})
+	if orderedEmpty.Count() != 1 {
+		t.Error("Should still have items")
+	}
+}
+
+func TestNewMapOrderedWithKeys(t *testing.T) {
+	data := map[string]int{"a": 1, "b": 2, "c": 3}
+	keys := []string{"c", "a", "b"}
+	m := collections.NewMapOrdered(data, keys)
+	orderedKeys := m.Keys().All()
+	if len(orderedKeys) != 3 || orderedKeys[0] != "c" {
+		t.Error("NewMapOrdered should respect key order")
+	}
+}
+
+func TestMapCollectionLastNonEmpty(t *testing.T) {
+	m := collections.NewMapOrdered(map[string]int{"a": 1, "b": 2}, []string{"a", "b"})
+	last := m.Last()
+	if last != 2 {
+		t.Error("Last should return last value")
+	}
+}
+
+func TestMapCollectionFirstKeyNonEmpty(t *testing.T) {
+	m := collections.NewMapOrdered(map[string]int{"a": 1, "b": 2}, []string{"a", "b"})
+	firstKey := m.FirstKey()
+	if firstKey != "a" {
+		t.Error("FirstKey should return first key")
+	}
+}
+
+func TestMapCollectionContainsTrue(t *testing.T) {
+	m := collections.NewMap(map[string]int{"a": 1, "b": 2})
+	if !m.Contains(func(v int, k string) bool { return v == 1 }) {
+		t.Error("Contains should return true")
+	}
+}
+
+func TestMapCollectionContainsFalse(t *testing.T) {
+	m := collections.NewMap(map[string]int{"a": 1, "b": 2})
+	if m.Contains(func(v int, k string) bool { return v == 100 }) {
+		t.Error("Contains should return false")
+	}
+}
+
+func TestMapCollectionEveryTrue(t *testing.T) {
+	m := collections.NewMap(map[string]int{"a": 1, "b": 2})
+	if !m.Every(func(v int, k string) bool { return v > 0 }) {
+		t.Error("Every should return true")
+	}
+}
+
+func TestMapCollectionEveryFalse(t *testing.T) {
+	m := collections.NewMap(map[string]int{"a": 1, "b": 2})
+	if m.Every(func(v int, k string) bool { return v > 1 }) {
+		t.Error("Every should return false")
+	}
+}

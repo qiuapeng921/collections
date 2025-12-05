@@ -267,3 +267,99 @@ func TestArrCrossJoin(t *testing.T) {
 		t.Error("CrossJoin failed")
 	}
 }
+
+// 额外覆盖率测试
+
+func TestArrGetWithDefault(t *testing.T) {
+	data := map[string]any{"a": 1}
+	result := collections.Arr.Get(data, "b", "default")
+	if result != "default" {
+		t.Error("Get should return default when key not found")
+	}
+}
+
+func TestArrGetNestedNonMap(t *testing.T) {
+	data := map[string]any{"c": "not a map"}
+	result := collections.Arr.Get(data, "c.d", "default")
+	if result != "default" {
+		t.Error("Get should return default when path hits non-map")
+	}
+}
+
+func TestArrHasAnyAllMissing(t *testing.T) {
+	data := map[string]any{"a": 1}
+	if collections.Arr.HasAny(data, "x", "y", "z") {
+		t.Error("HasAny should return false when none exist")
+	}
+}
+
+func TestArrHasAnyFirstExists(t *testing.T) {
+	data := map[string]any{"direct": 123}
+	if !collections.Arr.HasAny(data, "direct", "notexist") {
+		t.Error("HasAny should return true when first exists")
+	}
+}
+
+func TestArrForgetNestedNonMap(t *testing.T) {
+	data := map[string]any{"nested": "string"}
+	collections.Arr.Forget(data, "nested.deep")
+	// 不应 panic
+}
+
+func TestArrForgetNestedSuccess(t *testing.T) {
+	data := map[string]any{"nested": map[string]any{"inner": 1}}
+	collections.Arr.Forget(data, "nested.inner")
+	if inner, ok := data["nested"].(map[string]any); ok {
+		if _, exists := inner["inner"]; exists {
+			t.Error("Forget should delete nested key")
+		}
+	}
+}
+
+func TestArrAddNew(t *testing.T) {
+	data := map[string]any{}
+	collections.Arr.Add(data, "newkey", "newvalue")
+	if data["newkey"] != "newvalue" {
+		t.Error("Add should add when key doesn't exist")
+	}
+}
+
+func TestArrFirstNoPredicate(t *testing.T) {
+	items := []any{10, 20, 30}
+	first := collections.Arr.First(items)
+	if first != 10 {
+		t.Error("First without predicate should return first element")
+	}
+}
+
+func TestArrLastNoPredicate(t *testing.T) {
+	items := []any{10, 20, 30}
+	last := collections.Arr.Last(items)
+	if last != 30 {
+		t.Error("Last without predicate should return last element")
+	}
+}
+
+func TestArrFirstWithMatch(t *testing.T) {
+	items := []any{10, 20, 30}
+	first := collections.Arr.First(items, func(v any) bool { return v.(int) > 15 })
+	if first != 20 {
+		t.Error("First with predicate should return matching element")
+	}
+}
+
+func TestArrLastWithMatch(t *testing.T) {
+	items := []any{10, 20, 30}
+	last := collections.Arr.Last(items, func(v any) bool { return v.(int) < 25 })
+	if last != 20 {
+		t.Error("Last with predicate should return last matching element")
+	}
+}
+
+func TestArrRandomSingleElement(t *testing.T) {
+	items := []any{1}
+	result := collections.Arr.Random(items)
+	if result != 1 {
+		t.Error("Random on single should return element")
+	}
+}
