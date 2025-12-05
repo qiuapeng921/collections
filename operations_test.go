@@ -366,7 +366,9 @@ func TestOnce(t *testing.T) {
 		count++
 		return count
 	})
-	if fn() != 1 || fn() != 1 || count != 1 {
+	first := fn()
+	second := fn()
+	if first != 1 || second != 1 || count != 1 {
 		t.Error("Once failed")
 	}
 }
